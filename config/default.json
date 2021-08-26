@@ -1,0 +1,5 @@
+{
+  "mongoURI": "mongodb+srv://Falcons:Falcons@greenfield.64vuq.mongodb.net/matbakhi?retryWrites=true&w=majority",
+  "jwtSecret": "waterMellon"
+}
+
