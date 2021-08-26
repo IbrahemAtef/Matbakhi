@@ -41,3 +41,11 @@ mutation {
     cheifID
   }
 }
+
+// delete Recipe
+
+mutation {
+  deleteRecipe(id:"1"){
+    id
+  }
+}
