@@ -52,4 +52,16 @@ const deleteRecipeQuery = gql`
     }
 `;
 
-export { addUserQuery, deleteUserQuery, editUserQuery, addRecipeQuery, deleteRecipeQuery }; 
+const loginQuery = gql`
+    mutation ($email: String!, $password: String!) {
+        login(email:$email, password:$password){
+            id
+            username
+            email
+            type
+            picture
+        }
+    }
+`;
+
+export { addUserQuery, deleteUserQuery, editUserQuery, addRecipeQuery, deleteRecipeQuery, loginQuery }; 

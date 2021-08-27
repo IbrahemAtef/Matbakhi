@@ -1,12 +1,12 @@
 import { useState } from "react";
-import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faLock } from "@fortawesome/free-solid-svg-icons";
 import swal from "sweetalert";
+import { loginQuery } from "../../queries/queries";
+import { graphql } from "react-apollo";
+import jwt from 'jsonwebtoken'
 
 const Login = (props) => {
-  //   const [email, setEmail] = useState("");
-  //   const [password, setPassword] = useState("");
   const [inputValues, setInputValues] = useState({
     email: "",
     password: "",
@@ -22,10 +22,31 @@ const Login = (props) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      let { token, type } = await (
-        await axios.post("/api/auth/loginUser", { email, password })
-      ).data;
-      localStorage.setItem("token", token);
+      let result =  await props.loginQuery({
+        variables: {
+          email,
+          password,
+        },
+      });
+      
+      const { type } = result.data.login;
+
+      const payload = {
+        user: {
+          email,
+          type
+        },
+      };
+
+      jwt.sign(
+        payload,
+        "waterMellon",
+        { expiresIn: 360000 },
+        (err, token) => {
+          if (err) throw err;
+            localStorage.setItem("token", token)
+        },
+      );      
       if (type === "cheif") {
         props.history.push("/dashboard");
       } else {
@@ -97,4 +118,4 @@ const Login = (props) => {
   );
 };
 
-export default Login;
+export default graphql(loginQuery, { name: "loginQuery" })(Login);

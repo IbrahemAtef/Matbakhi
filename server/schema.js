@@ -103,15 +103,15 @@ const Mutation = new GraphQLObjectType({
           const data = await UserModel.findOne({ email: args.email });
           if (data.password) {
             if (await bcrypt.compare(args.password, data.password)) {
-              const token = jwt.sign(
-                { id: data.id, username: data.username, email: data.email },
-                secretKey,
-                {
-                  algorithm: "HS256",
-                  expiresIn: "2 days",
-                }
-              );
-              localStorage.setItem("token", token); ////////////////////////////////
+              // const token = jwt.sign(
+              //   { id: data.id, username: data.username, email: data.email },
+              //   secretKey,
+              //   {
+              //     algorithm: "HS256",
+              //     expiresIn: "2 days",
+              //   }
+              // );
+              // localStorage.setItem("token", token); 
               return await UserModel.findOne({ email: args.email });
             }
           } else {

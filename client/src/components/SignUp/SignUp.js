@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEnvelope,
@@ -21,10 +21,6 @@ const SignUp = (props) => {
     cheifKey: "",
   });
 
-  useEffect(() => {
-    
-  }, [])
-
   const { username, email, password, type, cheifKey } = inputValues;
 
   const handleOnChange = (event) => {
@@ -40,8 +36,7 @@ const SignUp = (props) => {
     }
     
     try {
-      // let result =
-      await props.addUserQuery({
+      let result =  await props.addUserQuery({
         variables: {
           username,
           email,
@@ -68,11 +63,11 @@ const SignUp = (props) => {
             localStorage.setItem("token", token)
         },
       );      
-      // if (result.data.addUser.type === "cheif") {
-      //   props.history.push("/dashboard");
-      // } else {
-      //   props.history.push("/");
-      // }
+      if (result.data.addUser.type === "cheif") {
+        props.history.push("/dashboard");
+      } else {
+        props.history.push("/");
+      }
     } catch (error) {
       swal("OoOps!", " Please fill all the fields correctly.", "error");
       setInputValues({
