@@ -80,6 +80,11 @@ const Dashboard = (props) => {
             });
         }
         //////////////////////////////////////////////////////////////////////
+        const {getUserByEmail} =props.getUserByEmail;
+        setInputValues({
+          cheif: getUserByEmail,
+          recipes: getUserByEmail && getUserByEmail.recipes,
+        })
     }, []);
 
     return (
@@ -403,7 +408,7 @@ const Dashboard = (props) => {
 export default graphql(getUserByEmail, {name: "getUserByEmail", options: (props)=>{
   return {
     variables: {
-      email: "ahmed@gmail.com"
+      email: props.history.location.state.state.email
     }
   }
 }})(Dashboard);

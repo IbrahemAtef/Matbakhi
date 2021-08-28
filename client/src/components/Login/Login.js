@@ -48,9 +48,9 @@ const Login = (props) => {
         },
       );      
       if (type === "cheif") {
-        props.history.push("/dashboard");
+        props.history.push("/dashboard", {state: {email}});
       } else {
-        props.history.push("/");
+        props.history.push("/", {state: {email}});
       }
     } catch (error) {
       swal("OoOps!", " Invalid email or password.", "error");

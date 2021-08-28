@@ -64,9 +64,9 @@ const SignUp = (props) => {
         },
       );      
       if (result.data.addUser.type === "cheif") {
-        props.history.push("/dashboard");
+        props.history.push("/dashboard", {state: {email}});
       } else {
-        props.history.push("/");
+        props.history.push("/", {state: {email}});
       }
     } catch (error) {
       swal("OoOps!", " Please fill all the fields correctly.", "error");
