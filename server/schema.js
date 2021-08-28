@@ -28,7 +28,12 @@ const UserType = new GraphQLObjectType({
     password: { type: GraphQLString },
     type: { type: GraphQLString },
     picture: { type: GraphQLString },
-    // recipes:
+    recipes: {
+      type: new GraphQLList(RecipeType),
+      async resolve(root, args) {
+        return await RecipeModel.find({ cheifID: root.id });
+      },
+    },
   }),
 });
 
@@ -67,13 +72,13 @@ const SavedCheifsType = new GraphQLObjectType({
 const RootQuery = new GraphQLObjectType({
   name: "RootQueryType",
   fields: {
-    user: {
+    getUserByEmail: {
       type: UserType,
       args: {
-        id: { type: new GraphQLNonNull(GraphQLString) },
+        email: { type: new GraphQLNonNull(GraphQLString) },
       },
       async resolve(root, args) {
-        return await UserModel.findOne({ _id: args.id });
+        return await UserModel.findOne({ email: args.email });
       },
     },
     recipe: {
@@ -103,15 +108,6 @@ const Mutation = new GraphQLObjectType({
           const data = await UserModel.findOne({ email: args.email });
           if (data.password) {
             if (await bcrypt.compare(args.password, data.password)) {
-              // const token = jwt.sign(
-              //   { id: data.id, username: data.username, email: data.email },
-              //   secretKey,
-              //   {
-              //     algorithm: "HS256",
-              //     expiresIn: "2 days",
-              //   }
-              // );
-              // localStorage.setItem("token", token); 
               return await UserModel.findOne({ email: args.email });
             }
           } else {
