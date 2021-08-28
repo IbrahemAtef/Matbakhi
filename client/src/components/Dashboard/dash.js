@@ -130,9 +130,18 @@ const Dashboard = (props) => {
           steps,
           cheifID: cheif.id,
         },
-        // refetchQueries: [{query: getUserByEmail}]
+        // refetchQueries: [
+        //   { query: getUserByEmail }
+        // ],
       });
       await swal("Good job!", "Recipe added.", "success");
+      setInputValues({
+        title: "",
+        description: "",
+        image: "",
+        picture: personal,
+        type: "",
+      })
     } catch (error) {
       await swal("OoOps!", "Failed to add recipe.", "error");
     }
