@@ -13,11 +13,13 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import $ from "jquery";
 import { useState, useEffect } from "react";
-import jwt from 'jsonwebtoken'
+import jwt from "jsonwebtoken";
 import swal from "sweetalert";
 // import bcrypt from "bcryptjs";
-import { getUserByEmail } from "../../queries/queries";
-import { graphql, compose } from "react-apollo";
+import { getUserByEmail, addRecipeQuery } from "../../queries/queries";
+import { graphql } from "react-apollo";
+import { flowRight as compose } from "lodash";
+import axios from "axios";
 
 const Dashboard = (props) => {
   const [inputValues, setInputValues] = useState({
@@ -53,41 +55,135 @@ const Dashboard = (props) => {
     setInputValues({ ...inputValues, [name]: value });
   };
 
-    useEffect(() => {
-        if (!localStorage.getItem("token")) {
-            props.history.push("/");
-        } else {
-            ///////////////// jquery ///////////////
-            $(function () {
-                $(".nav_btn").on("click", function () {
-                $(".mobile_nav_items").toggleClass("active");
-                });
-                $(".sidebar > span").on("click", function (e) {
-                let classN = $(e.currentTarget).attr("data-section");
-                $(e.currentTarget)
-                    .addClass("active")
-                    .siblings()
-                    .removeClass("active");
-                $(classN).show().siblings().hide();
-                });
-                $(".btn").on("click", function () {
-                $($(this).siblings()[1]).append(`<p>
-                    <label>${$($(this).siblings()[1]).children().length + 1}.</label>
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      props.history.push("/");
+    } else {
+      ///////////////// jquery ///////////////
+      $(function () {
+        $(".nav_btn").on("click", function () {
+          $(".mobile_nav_items").toggleClass("active");
+        });
+        $(".sidebar > span").on("click", function (e) {
+          let classN = $(e.currentTarget).attr("data-section");
+          $(e.currentTarget)
+            .addClass("active")
+            .siblings()
+            .removeClass("active");
+          $(classN).show().siblings().hide();
+        });
+        $(".btn").on("click", function () {
+          $($(this).siblings()[1]).append(`<p>
+                    <label>${
+                      $($(this).siblings()[1]).children().length + 1
+                    }.</label>
                     <input type="text" >
                     </p>`);
-                });
-                $(".spinner-border").hide();
-            });
-        }
-        //////////////////////////////////////////////////////////////////////
-        const {getUserByEmail} =props.getUserByEmail;
-        setInputValues({
-          cheif: getUserByEmail,
-          recipes: getUserByEmail && getUserByEmail.recipes,
-        })
-    }, []);
+        });
+        $(".spinner-border").hide();
+      });
+    }
+    //////////////////////////////////////////////////////////////////////
+    if (!props.getUserByEmail.loading) {
+      const { getUserByEmail } = props.getUserByEmail;
+      setInputValues({...inputValues,
+        cheif: getUserByEmail,
+        recipes:  getUserByEmail.recipes,
+        newUserName:  getUserByEmail.username,
+        picture:  getUserByEmail.picture || picture,
+        oldPassword: "",
+        newPassword: "",
+        newPasswordConfirm: "",
+      });
+    }
+      
+  }, [props.getUserByEmail.loading]);
 
-    return (
+  const addNewRecipe = async (e) => {
+    e.preventDefault();
+    var ingredients = [];
+    $(".ingredients > .steps > p > input").each((index, input) => {
+      let text = $(input).val();
+      ingredients.push(text);
+    });
+    var steps = [];
+    $(".preparation_steps > .steps > p > input").each((index, input) => {
+      let text = $(input).val();
+      steps.push(text);
+    });
+    try {
+      if (ingredients.join("").length === 0 || steps.join("").length === 0) {
+        await swal(
+          "OoOps!",
+          "Make sure to add the ingredients and preparation steps.",
+          "error"
+        );
+        return;
+      }
+      let result = await props.addRecipeQuery({
+        variables: {
+          title,
+          description,
+          image,
+          type,
+          ingredients,
+          steps,
+          cheifID: cheif.id,
+        },
+        // refetchQueries: [{query: getUserByEmail}]
+      });
+      await swal("Good job!", "Recipe added.", "success");
+    } catch (error) {
+      await swal("OoOps!", "Failed to add recipe.", "error");
+    }
+  };
+
+  const uploadImage = async (e) => {
+    $(".spinner-border").show();
+    const formData = new FormData();
+    const file = e.target.files[0];
+    formData.append("file", file);
+    formData.append("upload_preset", "snkyxvjw");
+    try {
+      var image = await (
+        await axios.post(
+          "https://api.cloudinary.com/v1_1/dbeuaqex2/image/upload",
+          formData
+        )
+      ).data.url;
+      await swal("Good job!", "The image has uploaded.", "success");
+      setInputValues({ ...inputValues, image } );
+      await $(".spinner-border").hide();
+    } catch (error) {
+      swal("OoOps!", "The image didn't upload, try again.", "error");
+    }
+  };
+
+  // const editUser = async (key, valueOne, valueTwo, valueThree) => {
+  //   try {
+  //     var o = {};
+  //     if (key === 'password') {
+  //       const isMatchOldPassword = await bcrypt.compare(valueTwo,cheif.password);
+  //       if (isMatchOldPassword) {
+  //         if (valueTwo === valueOne) {
+  //           throw new Error("The new password is the same of the old one");
+  //         } else if (valueOne !== valueThree) {
+  //           throw new Error("Please make sure the new password and the the confirm of it are the same");
+  //         }
+  //       } else {
+  //         throw new Error("The old password doesn't match");
+  //       }
+  //     }
+  //     o[key] = valueOne;
+  //     // var msg = await (await axios.patch(`/api/users/editUser/${this.state.cheif._id}`, o)).data;
+  //     await swal('Good job!', msg, 'success');
+  //     await this.getUser();
+  //   } catch (error) {
+  //     await swal('OoOps!', 'Failed to update User ' + error, 'error');
+  //   }
+  // }
+
+  return (
     <div>
       <input type="checkbox" id="check" />
       {/* <!--header area start--> */}
@@ -187,11 +283,7 @@ const Dashboard = (props) => {
                 </div>
                 <p>
                   <label>
-                    <input
-                      type="file"
-                      name="file"
-                      // onChange={this.uploadImage.bind(this)} //////////////////////////////////////////////*/*/*/*/*////////
-                    />
+                    <input type="file" name="file" onChange={uploadImage} />
                     <FontAwesomeIcon icon={faImage} />{" "}
                     <span className="add-photos">Add Photo</span>
                   </label>
@@ -247,11 +339,7 @@ const Dashboard = (props) => {
               </div>
             </div>
             <div className="clear_fix"></div>
-            <button 
-            // onClick={handleSubmit}
-            >
-              Save new recipe
-            </button>
+            <button onClick={addNewRecipe}>Save new recipe</button>
           </div>
         </div>
 
@@ -336,11 +424,7 @@ const Dashboard = (props) => {
                 </div>
                 <p>
                   <label>
-                    <input
-                      type="file"
-                      name="file"
-                      // onChange={uploadImage}
-                    />
+                    <input type="file" name="file" onChange={uploadImage} />
                     <FontAwesomeIcon icon={faImage} />{" "}
                     <span className="add-photos">Add Photo</span>
                   </label>
@@ -405,10 +489,16 @@ const Dashboard = (props) => {
   );
 };
 
-export default graphql(getUserByEmail, {name: "getUserByEmail", options: (props)=>{
-  return {
-    variables: {
-      email: props.history.location.state.state.email
-    }
-  }
-}})(Dashboard);
+export default compose(
+  graphql(getUserByEmail, {
+    name: "getUserByEmail",
+    options: (props) => {
+      return {
+        variables: {
+          email: props.location.state.state.email,
+        },
+      };
+    },
+  }),
+  graphql(addRecipeQuery, { name: "addRecipeQuery" })
+)(Dashboard);

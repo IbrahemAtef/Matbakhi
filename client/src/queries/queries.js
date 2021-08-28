@@ -86,26 +86,4 @@ const getUserByEmail = gql`
     }
 `;
 
-// const getUserByEmail = gql`
-//     {
-//         getUserByEmail(email:"ahmed@gmail.com"){
-//             id
-//             username
-//             email
-//             type
-//             picture
-//             recipes{
-//                 id
-//                 title
-//                 description
-//                 ingredients
-//                 steps
-//                 image
-//                 type
-//                 cheifID
-//             }
-//         }
-//     }
-// `;
-
 export { addUserQuery, deleteUserQuery, editUserQuery, addRecipeQuery, deleteRecipeQuery, loginQuery, getUserByEmail }; 

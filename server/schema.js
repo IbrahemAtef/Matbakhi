@@ -81,15 +81,15 @@ const RootQuery = new GraphQLObjectType({
         return await UserModel.findOne({ email: args.email });
       },
     },
-    recipe: {
-      type: RecipeType,
-      args: {
-        id: { type: new GraphQLNonNull(GraphQLString) },
-      },
-      async resolve(root, args) {
-        return await RecipeModel.findOne({ _id: args.id });
-      },
-    },
+    // recipe: {
+    //   type: RecipeType,
+    //   args: {
+    //     id: { type: new GraphQLNonNull(GraphQLString) },
+    //   },
+    //   async resolve(root, args) {
+    //     return await RecipeModel.findOne({ _id: args.id });
+    //   },
+    // },
   },
 });
 
